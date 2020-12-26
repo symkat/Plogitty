@@ -1,0 +1,14 @@
+#!/usr/bin/env perl
+use Plogitty;
+
+if ( @ARGV ) {
+    Plogitty->new( root => 'Plogitty' )->run(@ARGV);
+} else {
+    print <<"    EOF";
+    Plogitty - A Static Website Generator
+
+    plogitty new mysite.com - Create a new project directory mysite.com
+    plogitty build:build    - From the top level of a project directory, build the project.
+
+    EOF
+}
