@@ -44,7 +44,7 @@ define index => (
 
         my @links;
         foreach my $file ( @{$plan->stash->{files}} ) {
-            my $metadata = $c->model("Markdown")->metadata($file->[-1]);
+            my $metadata = $c->model("Markdown")->metadata_from_file($file->[-1]);
 
             push @links, { %{$metadata}, filename => $file->[0]  };
         }
