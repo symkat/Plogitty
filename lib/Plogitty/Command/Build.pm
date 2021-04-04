@@ -5,6 +5,7 @@ use File::Find;
 use File::Basename qw( fileparse );
 use File::Slurper qw( write_text );
 use File::Path qw( make_path remove_tree );
+use File::Copy::Recursive qw(dircopy);
 
 setup build => (
     desc => 'Create Build Directory',
@@ -99,10 +100,25 @@ define build => (
         
         my $index = $self->run( qw( /quiet build:index ) );
 
+        $self->run( qw( /quiet build:static ) );
+
         write_text( "build/index.html", $index->stash->{index_page} );
 
         $c->stash->{text} = "Created build/\n";
     }
+);
+
+define static => (
+    code => sub {
+        my ( $self, $c ) = @_;
+
+        # Copy template/static into build/
+        dircopy( 'template/static', 'build' );
+        
+
+        # Copy static into build/
+        dircopy( 'static', 'build' );
+    },
 );
 
 1; 
