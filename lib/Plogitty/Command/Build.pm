@@ -2,7 +2,7 @@ package Plogitty::Command::Build;
 use oCLI::Command;
 use Text::Xslate qw( mark_raw ); # Get mark_raw()
 use File::Find;
-use File::Basename qw( fileparse );
+use File::Basename qw( fileparse dirname );
 use File::Slurper qw( write_text );
 use File::Path qw( make_path remove_tree );
 use File::Copy::Recursive qw(dircopy);
@@ -24,7 +24,7 @@ define html => (
 
         # Store Markdown Values
         $c->stash->{markdown_vars} = $markdown->parser->metadata;
-        $c->stash->{markdown_html} = $markdown->result;
+        $c->stash->{markdown_html} = $markdown->compiler_for('Plogitty')->result;
 
         # Process the markdown file into an HTML file with its Text::Xslate template.
         $c->stash->{markdown_rendered} = $c->model("Xslate")->render($c->stash->{markdown_vars}->{template}, {
@@ -47,8 +47,12 @@ define index => (
         foreach my $file ( @{$plan->stash->{files}} ) {
             my $metadata = $c->model("Markdown")->metadata_from_file($file->[-1]);
 
+            next if $metadata->{index} and $metadata->{index} eq 'no';
+
             push @links, { %{$metadata}, filename => $file->[0]  };
         }
+
+        @links = sort { $b->{weight} <=> $a->{weight} } @links;
         
         $c->stash->{index_page} = $c->model("Xslate")->render('index.tx', {
                 links => [ @links ],
@@ -94,6 +98,9 @@ define build => (
             my ( $slug, $dir ) = fileparse($file->[0], qr|\.md$|);
             $slug = $markdown->stash->{markdown_vars}->{slug}
                 if $markdown->stash->{markdown_vars}->{slug};
+
+	    my $dirname = dirname("build/$slug.html");
+	    make_path($dirname);
 
             write_text( "build/$slug.html", $markdown->stash->{markdown_rendered} );
         }
