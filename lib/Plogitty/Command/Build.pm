@@ -24,7 +24,7 @@ define html => (
 
         # Store Markdown Values
         $c->stash->{markdown_vars} = $markdown->parser->metadata;
-        $c->stash->{markdown_html} = $markdown->compiler_for('Plogitty')->result;
+        $c->stash->{markdown_html} = $markdown->compiler_for('+Plogitty::MarkdownTarget')->result;
 
         # Process the markdown file into an HTML file with its Text::Xslate template.
         $c->stash->{markdown_rendered} = $c->model("Xslate")->render($c->stash->{markdown_vars}->{template}, {
